@@ -5,19 +5,19 @@
 #include <string.h>
 #include <fstream>
 using namespace std;
-typedef map <string, pair<string,char> > dictionary;
-dictionary buildDictionary(){
-    dictionary optable;
-    ifstream in;
-    in.open("opcode");
-    while(in!=NULL){
+typedef map <string, pair<string,char> > table;
+table buildTable(){
+    table optable;
+    ifstream opcode;
+    opcode.open("opcode");
+    while(opcode!=NULL){
         string s1,s2;
         char s3;
-        in>>s1>>s2>>s3;
+        opcode>>s1>>s2>>s3;
         optable[s2] = make_pair(s1,s3);
         //cout<<optable[s2].first<<endl;
     }
-    in.close();
+    opcode.close();
     return optable;
 }
 
