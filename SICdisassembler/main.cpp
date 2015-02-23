@@ -29,7 +29,7 @@ string tostring(int x){
 void headerRecord(string s){
     proglength = strtol(s.substr(13,6).c_str(),NULL,16);
     start = strtol(s.substr(7,6).c_str(),NULL,16);
-    cout<<s.substr(7,6)<<"\t"<<s.substr(1,6)<<"\t"<<"START\t"<<s.substr(7,6)<<endl;
+    cout<<" \t"<<s.substr(7,6)<<"\t"<<s.substr(1,6)<<"\t"<<"START\t"<<s.substr(7,6)<<endl;
 }
 string getAddress(string s){
     int i=1;
@@ -103,16 +103,13 @@ void textRecord(string s){
             }
             //instruction is subroutine
             else{
+                code[addr.value]->objcode = curr;
                 if(strtol(curr.substr(2,1).c_str(),NULL,16)>=8){
                     curr[2] = strtol(curr.substr(2,1).c_str(),NULL,16) - 8 +'0';
                 }
                 code[addr.value]->loc = addr.value;
                 code[addr.value]->mnemonic = optable[curr.substr(0,2)].first;
-                if(strtol(curr.substr(2,1).c_str(),NULL,16)>=8){
-                    curr[2] = strtol(curr.substr(2,1).c_str(),NULL,16) - 8 +'0';
-                }
                 code[addr.value]->target = curr.substr(2,4);
-                code[addr.value]->objcode = curr;
                 if(optable[curr.substr(0,2)].second == 's'){
                     if(code[curr.substr(2,4)]==0){
                         code[curr.substr(2,4)] = new lineOfCode(curr.substr(2,4),"LBL" + tostring(lastLabel),"","","");
@@ -137,11 +134,12 @@ void textRecord(string s){
                 addr = addr + three;
                 continue;
             }
+            code[addr.value] = new lineOfCode(addr.value,"",optable[curr.substr(0,2)].first,curr.substr(2,4),curr);
             if(strtol(curr.substr(2,1).c_str(),NULL,16)>=8){
                 curr[2] = strtol(curr.substr(2,1).c_str(),NULL,16) - 8 +'0';
             }
             //cout<<optable[curr.substr(0,2)].first<<endl;
-            code[addr.value] = new lineOfCode(addr.value,"",optable[curr.substr(0,2)].first,curr.substr(2,4),curr);
+            code[addr.value]->target = curr.substr(2,4);
             if(optable[curr.substr(0,2)].second == 's'){
                 if(code[curr.substr(2,4)]==0){
                     code[curr.substr(2,4)] = new lineOfCode(curr.substr(2,4),"LBL" + tostring(lastLabel),"","","");
@@ -184,6 +182,9 @@ void secondPass(){
         else if(optable[it->second->objcode.substr(0,2)].second == 's'){
             it->second->target = code[it->second->target]->label;
         }
+        else if(strtol(it->second->objcode.substr(2,1).c_str(),NULL,16)>=8){
+            it->second->target+=" , X";
+        }
     }
 }
 string endRecord(string s){
@@ -204,7 +205,7 @@ void readObjectCode(string objectfile){
     }
     secondPass();
     for(map <string,lineOfCode*>::iterator it = code.begin();it!=code.end();++it){
-        cout<<it->second->loc<<"\t"<<it->second->label<<"\t"<<it->second->mnemonic<<"\t"<<it->second->target<<"\t"<<it->second->objcode<<endl;
+        cout<<it->second->objcode<<"\t"<<it->second->loc<<"\t"<<it->second->label<<"\t"<<it->second->mnemonic<<"\t"<<it->second->target<<endl;
     }
     cout<<endrec<<endl;
     in.close();
